@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>THE LAST FRAME — A campus OSINT murder mystery</title>
+<style>
+:root{--bg:#0d0f12;--ink:#e9e4d8;--mute:#9a9588;--red:#c8372d;--paper:#ece3cb;--pt:#2a2620;--man:#c9a45c;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d0f12}}
+:root[data-theme="dark"]{--bg:#0d0f12}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:radial-gradient(ellipse at 50% 0,#1b1f26,var(--bg) 70%);color:var(--ink);font:17px/1.65 Georgia,'Times New Roman',serif;min-height:100vh;overflow-x:hidden}
+.mono{font-family:'Courier New',monospace;letter-spacing:.12em;text-transform:uppercase}
+/* intro */
+#intro{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;perspective:1400px;transition:opacity .9s,transform .9s}
+body.rev #intro{opacity:0;transform:translateY(-40px);pointer-events:none;position:absolute;inset:0;height:100vh;overflow:hidden}
+.folder{position:relative;width:min(320px,80vw);height:min(420px,104vw);transform-style:preserve-3d;transform:rotateX(14deg)}
+.back{position:absolute;inset:0;background:#a98d58;border-radius:4px 10px 6px 6px;box-shadow:0 30px 60px #000a}
+.back:before{content:"";position:absolute;left:0;top:-16px;width:42%;height:18px;background:#a98d58;border-radius:8px 8px 0 0}
+.sheet{position:absolute;inset:14px 12px;background:var(--paper);padding:20px;color:var(--pt);font-size:11px;transition:transform 1.2s .5s;box-shadow:0 2px 6px #0006}
+.sheet i{display:block;height:6px;background:#2a262022;margin:9px 0}
+.folder.open .sheet{transform:translateY(-34px) rotate(-1.5deg)}
+.cover{position:absolute;inset:0;transform-origin:left center;transition:transform 1.4s cubic-bezier(.6,.05,.3,1);background:linear-gradient(135deg,#c1a263,#a98d58);border-radius:4px 10px 6px 6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;backface-visibility:hidden;border:1px solid #7a6637}
+.folder.open .cover{transform:rotateY(-168deg)}
+.label{background:var(--paper);color:var(--pt);padding:14px 20px;text-align:center;transform:rotate(-2deg);box-shadow:0 2px 4px #0005}
+.label b{display:block;font-size:22px;letter-spacing:.2em}
+.stamp{border:3px solid var(--red);color:var(--red);padding:2px 12px;font-weight:700;transform:rotate(-8deg);font-size:20px;opacity:.85}
+button.go{background:none;color:var(--ink);border:1px solid var(--ink);padding:14px 30px;font-size:13px;cursor:pointer;transition:.3s}
+button.go:hover{background:var(--ink);color:var(--bg)}
+.sub{color:var(--mute);font-size:12px}
+/* dossier */
+#file{display:none;max-width:1000px;margin:0 auto;padding:40px 20px 90px}
+body.rev #file{display:block}
+.board{display:flex;flex-wrap:wrap;gap:34px 26px;justify-content:center;padding:34px 10px 20px;margin-bottom:10px}
+.pol{position:relative;width:min(210px,42vw);background:#f1ecdf;padding:10px 10px 30px;box-shadow:0 12px 24px #000a;opacity:0;transform:translateY(-120px) rotate(0)}
+body.rev .pol{animation:drop .8s cubic-bezier(.3,1.4,.5,1) forwards;animation-delay:calc(.5s + var(--i)*.35s)}
+@keyframes drop{to{opacity:1;transform:translateY(0) rotate(var(--r))}}
+.pol svg{display:block;width:100%;background:#000}
+.pol small{display:block;color:#3a352c;text-align:center;margin-top:8px;font-size:10px}
+.clip{position:absolute;top:-16px;left:50%;width:22px;height:46px;margin-left:-11px;border:4px solid #b8bcc2;border-radius:12px 12px 6px 6px;z-index:2;filter:drop-shadow(0 2px 2px #0008)}
+.clip:after{content:"";position:absolute;left:3px;top:10px;right:3px;bottom:6px;border:3px solid #8f949b;border-radius:8px}
+.tape{position:absolute;top:-10px;left:50%;width:70px;height:22px;margin-left:-35px;background:#e8d98a99;transform:rotate(var(--t,-4deg));z-index:2}
+.rec{animation:bl 1s steps(2) infinite}@keyframes bl{50%{opacity:0}}
+.fig{animation:walk 6s linear infinite}@keyframes walk{0%{transform:translateX(0)}50%{transform:translateX(70px)}51%,100%{transform:translateX(70px);opacity:0}}
+.fl{animation:fl 3s infinite}@keyframes fl{0%,92%,100%{opacity:1}94%{opacity:.4}96%{opacity:.9}}
+.scan{animation:sc 3s linear infinite}@keyframes sc{to{transform:translateY(120px)}}
+.paper{background:var(--paper);color:var(--pt);padding:clamp(24px,5vw,56px);box-shadow:0 20px 50px #000b;position:relative;opacity:0}
+body.rev .paper{animation:fade 1s 1.9s forwards}@keyframes fade{to{opacity:1}}
+.paper h1{font-size:clamp(38px,9vw,76px);letter-spacing:.14em;margin:0;line-height:1}
+.tag{color:var(--red);font-size:13px;margin:8px 0 18px}
+.disc{border-left:3px solid var(--red);padding:4px 14px;font-style:italic;font-size:15px;margin:0 0 26px}
+h2{font-size:14px;margin:34px 0 10px;color:var(--red);border-bottom:1px solid #2a262033;padding-bottom:6px}
+.sus{list-style:none;padding:0;display:grid;gap:10px}
+.sus li{background:#2a26200d;border:1px solid #2a262022;padding:10px 14px}
+.sus b{font-size:18px}.sus span{font-family:'Courier New',monospace;color:#7a2a24;font-size:14px}
+ol.rules li{margin-bottom:6px}
+.begin{margin-top:34px;padding:18px;background:var(--pt);color:var(--paper);text-align:center}
+.begin b{color:var(--man)}
+.red{position:absolute;top:18px;right:18px;transform:rotate(9deg)}
+.rep{margin-top:40px;background:#17140f;color:var(--paper);padding:clamp(20px,4vw,40px);position:relative;border:1px solid #000;box-shadow:inset 0 0 0 6px #17140f,inset 0 0 0 7px #c9a45c55}
+.rep h2{color:var(--man);border-color:#c9a45c44;margin-top:0}
+.rep label{display:block;font-size:11px;color:#b9b2a0;margin:16px 0 4px}
+.rep input,.rep textarea{width:100%;background:#0d0b08;border:0;border-bottom:1px solid #c9a45c88;color:var(--paper);font:16px 'Courier New',monospace;padding:10px;outline:0}
+.rep input:focus,.rep textarea:focus{border-color:var(--red);background:#120f0a}
+.qg{display:grid;grid-template-columns:1fr 1fr;gap:0 22px}@media(max-width:640px){.qg{grid-template-columns:1fr}}
+.sus2{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.sus2 button{flex:1;min-width:140px;background:none;border:1px solid #c9a45c88;color:var(--paper);padding:12px;cursor:pointer;font:13px 'Courier New',monospace;letter-spacing:.1em;transition:.2s}
+.sus2 button.on{background:var(--red);border-color:var(--red);color:#fff;transform:rotate(-1deg)}
+.file2{margin-top:26px;width:100%;background:var(--red);color:#fff;border:0;padding:16px;font-size:14px;cursor:pointer}
+.file2:disabled{opacity:.5}
+#msg{margin-top:12px;font-size:12px;color:#e8a29b;min-height:18px}
+.filed{position:absolute;inset:0;display:none;align-items:center;justify-content:center;background:#0d0b08ee;z-index:3}
+.filed.show{display:flex}
+.filed span{border:5px solid var(--red);color:var(--red);font-size:clamp(28px,8vw,56px);padding:10px 26px;font-weight:700;animation:st .5s cubic-bezier(.2,2,.4,1) both;text-align:center}
+@keyframes st{from{transform:scale(3) rotate(-20deg);opacity:0}to{transform:scale(1) rotate(-8deg);opacity:1}}
+.cta{display:inline-block;background:var(--red);color:#fff;text-decoration:none;padding:18px 40px;font-size:15px;letter-spacing:.2em;box-shadow:0 0 0 4px var(--paper),0 0 0 6px var(--red);transition:.25s}.cta:hover{transform:translateY(-3px) rotate(-1deg);background:#e0463b}
+.pages{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}.pg{display:block;position:relative;background:var(--pt);color:var(--paper);text-decoration:none;padding:14px 16px;font-size:13px;letter-spacing:.06em;text-transform:none;transition:.2s;border-left:4px solid var(--red)}.pg small{display:block;color:var(--man);font-size:10px;letter-spacing:.2em;text-transform:uppercase;margin-bottom:4px}.pg span{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--red);font-size:18px}.pg:hover{transform:translateX(4px);background:#3a342b}
+</style></head>
+<body>
+<section id="intro">
+ <div class="mono sub">Campus Police · Case No. 0417</div>
+ <div class="folder" id="folder">
+  <div class="back"></div>
+  <div class="sheet"><b class="mono">Incident report</b><i></i><i></i><i></i><i style="width:60%"></i><i></i><i style="width:80%"></i></div>
+  <div class="cover"><div class="label mono"><b>THE LAST FRAME</b>Case file · Menon, R.</div><div class="stamp mono">Confidential</div></div>
+ </div>
+ <button class="go mono" id="open">Open the file</button>
+</section>
+
+<main id="file">
+ <div class="board">
+  <div class="pol" style="--i:0;--r:-5deg"><span class="clip"></span>
+   <svg viewBox="0 0 200 130"><rect width="200" height="130" fill="#12161b"/><rect y="88" width="200" height="42" fill="#1b2027"/><rect x="0" y="80" width="200" height="8" fill="#2b323b"/><g class="fl"><g class="fig"><circle cx="40" cy="52" r="7" fill="#05070a"/><path d="M33 60h14l4 28H29z" fill="#05070a"/></g></g><rect class="scan" y="-10" width="200" height="8" fill="#fff" opacity=".07"/><circle class="rec" cx="14" cy="14" r="4" fill="#e33"/><text x="24" y="18" fill="#eee" font-size="9" font-family="monospace">REC CAM 03</text><text class="tc" x="112" y="122" fill="#eee" font-size="9" font-family="monospace">23:42:07</text></svg>
+   <small class="mono">Terrace CCTV · clip 1</small></div>
+  <div class="pol" style="--i:1;--r:-3deg"><span class="clip"></span>
+   <svg viewBox="0 0 200 130"><rect width="200" height="130" fill="#0b0d10"/><g fill="none" stroke="#e9e4d8" stroke-width="2"><path d="M20 30V18h12M168 18h12v12M180 100v12h-12M32 112H20v-12"/><circle cx="100" cy="64" r="26"/><circle cx="100" cy="64" r="14"/></g><circle class="rec" cx="30" cy="30" r="4" fill="#e33"/><text x="38" y="34" fill="#eee" font-size="8" font-family="monospace">REC</text><text x="100" y="118" text-anchor="middle" fill="#9a9588" font-size="9" font-family="monospace">LAST FRAME · NO SIGNAL</text><g class="fl"><text x="100" y="68" text-anchor="middle" fill="#e33" font-size="10" font-family="monospace">?</text></g></svg>
+   <small class="mono">Rohan's camera · clip 3</small></div>
+  <div class="pol" style="--i:2;--r:6deg"><span class="tape" style="--t:5deg"></span>
+   <svg viewBox="0 0 200 130"><rect width="200" height="130" fill="#14171c"/><circle cx="100" cy="62" r="42" fill="#0b0d10" stroke="#e9e4d8" stroke-width="3"/><path d="M100 62V34M100 62l22 12" stroke="#e9e4d8" stroke-width="3" stroke-linecap="round"/><g fill="#c8372d"><path d="M100 20a42 42 0 0 1 32 15L100 62z" opacity=".35"/></g><text x="100" y="122" text-anchor="middle" fill="#c8372d" font-size="9" font-family="monospace">11:00 PM – 12:00 AM</text></svg>
+   <small class="mono">Time of death · est.</small></div>
+ </div>
+
+ <article class="paper">
+  <div class="stamp mono red">Open case</div>
+  <h1>THE LAST FRAME</h1>
+  <div class="tag mono">A campus OSINT murder mystery</div>
+  <p class="disc">This is a work of fiction. All characters, accounts and events are imaginary and not based on any real student, staff member or incident.</p>
+
+  <h2 class="mono">The case</h2>
+  <p>The fest is over, and the campus is quiet.</p>
+  <p>At 6:15 this morning, the security guard found Rohan Menon on the ground below the campus terrace. Rohan was a final-year student and the fest’s media head, and the person with a camera at every event. The terrace had been closed off for repairs, and his phone is missing. Police say he died between 11:00 PM and midnight.</p>
+  <p>In his last two weeks, Rohan’s posts turned strange. There were cropped screenshots, cryptic captions and a message nobody understood. He had found something, and he told someone.</p>
+  <p>Three people were close to Rohan and the fest:</p>
+  <ul class="sus">
+   <li><b>Kabir Nair</b> <span>@kabir.codes</span><br>roommate and best friend</li>
+   <li><b>Manish Iyer</b> <span>@manish.speaks</span><br>cultural committee head</li>
+   <li><b>Dev Malhotra</b> <span>@dev.after.dark</span><br>fest DJ and Rohan’s former best friend</li>
+  </ul>
+  <p>Each of them has an alibi on their page, and only one of them is lying.</p>
+
+  <h2 class="mono">Your mission</h2>
+  <p>Study the four Instagram pages (posts, stories and highlights), answer the 10 questions, and name the killer. Then prove it with one piece of evidence that can’t be explained away.</p>
+
+  <h2 class="mono">The rules</h2>
+  <ol class="rules">
+   <li>Ignore Instagram’s real upload times. Only what is inside the pictures counts, such as names, handles, numbers, backgrounds and clocks shown on a screen.</li>
+   <li>Look closely. Check captions, comments, highlights, bios, backgrounds and the last slide of every carousel.</li>
+   <li>Use only these four accounts. Everything you need is on them, so don’t go looking elsewhere or contact anyone.</li>
+   <li>Not every suspicious clue points to the killer. Some people look guilty for reasons that have nothing to do with the murder.</li>
+  </ol>
+  <h2 class="mono">The four pages</h2><div class="pages"><a class="pg mono" href="https://www.instagram.com/rohan.the.only/" target="_blank" rel="noopener"><small>The victim</small>@rohan.the.only<span>&nearr;</span></a><a class="pg mono" href="https://www.instagram.com/kabir.codes.in.heaven/" target="_blank" rel="noopener"><small>Roommate</small>@kabir.codes.in.heaven<span>&nearr;</span></a><a class="pg mono" href="https://www.instagram.com/manish.talks.a.lot/" target="_blank" rel="noopener"><small>Cultural head</small>@manish.talks.a.lot<span>&nearr;</span></a><a class="pg mono" href="https://www.instagram.com/dev.after.dark12/" target="_blank" rel="noopener"><small>Fest DJ</small>@dev.after.dark12<span>&nearr;</span></a></div>
+  <div class="begin mono">Begin at <b><a href="https://www.instagram.com/rohan.the.only/" target="_blank" rel="noopener" style="color:inherit">@rohan.the.only</a></b>, and start with his last story.<br><br>Good luck, detective.</div>
+  <div style="text-align:center;margin-top:34px"><a class="cta mono" id="cta" href="https://share.formgrid.com/KhKpu43Gh72hrlAz" target="_blank" rel="noopener">File your report &rarr;</a><p class="mono" style="font-size:11px;color:#7a6f5a;margin-top:12px">Your 10 answers, the killer, and your proof</p></div>
+ </article>
+</main>
+
+<script>
+const f=document.getElementById('folder'),b=document.getElementById('open');
+b.onclick=()=>{b.disabled=true;b.style.opacity=0;f.classList.add('open');setTimeout(()=>document.body.classList.add('rev'),2200)};
+const base=[23*3600+41*60+50,6*3600+15*60+30];let t=0;
+setInterval(()=>{t++;document.querySelectorAll('.tc').forEach((e,i)=>{const s=base[i%2]+t,p=n=>String(n).padStart(2,'0');e.textContent=p(Math.floor(s/3600)%24)+':'+p(Math.floor(s/60)%60)+':'+p(s%60)})},1000);
+</script>
+
+</body></html>
